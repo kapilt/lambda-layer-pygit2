@@ -18,13 +18,20 @@ RUN curl -L --output libgit2.tgz  https://github.com/libgit2/libgit2/archive/v${
 
 # Build Python Extension
 # LD_RUN_PATH lets us bake the lib path into the ext to avoid setting ld lib path at runtime.
-RUN LIBGIT2=/opt LD_RUN_PATH=/opt/lib pip3 install --prefix=/opt pygit2 && \
-    mkdir /opt/python && \
-    mv /opt/lib64 /opt/python/lib 
+# Unfortunately for cffi and pygit2 to find libgit, we'll still need LIBGIT2 env var.
+RUN LIBGIT2=/opt LD_RUN_PATH=/opt/lib pip3 install --prefix=/opt pygit2
 
-# Build Layer
+
+# Assemble Layer
 RUN cd /opt/ && \
-    zip /layer.zip -r lib python
+    mkdir /opt/python && \
+    mv /opt/lib64 /opt/python/lib && \
+    mv /opt/lib/python3.7/site-packages/* /opt/python/lib/python3.7/site-packages && \
+    rm -Rf lib/python3.7 && \
+    mkdir /output && \
+    # pycache gen for py3.7 \
+    LIBGIT2=/opt/ PYTHONPATH=/opt/python/lib/python3.7/site-packages python3 -c "import pygit2" && \
+    zip /layer.zip -r include lib python
     
 
     
