@@ -1,6 +1,7 @@
 FROM amazonlinux:latest
 
-ARG libgit2_version=0.27.7
+ARG libgit2_version=0.28.1
+ARG pygit2_version=0.28.1
 
 RUN yum install -y python3-pip python3-devel gcc cmake tar gzip make openssl-devel
 
@@ -19,7 +20,7 @@ RUN curl -L --output libgit2.tgz  https://github.com/libgit2/libgit2/archive/v${
 # Build Python Extension
 # LD_RUN_PATH lets us bake the lib path into the ext to avoid setting ld lib path at runtime.
 # Unfortunately for cffi and pygit2 to find libgit, we'll still need LIBGIT2 env var.
-RUN LIBGIT2=/opt LD_RUN_PATH=/opt/lib pip3 install --prefix=/opt pygit2
+RUN LIBGIT2=/opt LD_RUN_PATH=/opt/lib pip3 install --prefix=/opt pygit2==${pygit2_version}
 
 
 # Assemble Layer
